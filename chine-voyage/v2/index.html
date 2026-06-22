@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voyage en Chine — Arrivée à Pékin · Encre &amp; Sumi-e</title>
+  <meta name="description" content="Site vitrine immersif : un voyage en Chine au départ de Pékin, où une fleur de cerisier à l'encre éclôt au fil du défilement. Démonstration SVG + CSS — HETECH." />
+
+  <!-- Polices -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Manrope:wght@300;400;500;600&family=Ma+Shan+Zheng&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- GSAP + ScrollTrigger (CDN classique, exposés en global) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+</head>
+<body>
+
+  <!-- Texture papier de riz fixée en arrière-plan -->
+  <div class="paper-bg" aria-hidden="true"></div>
+
+  <!-- Fleur de cerisier à l'encre, fixée en plein écran -->
+  <div class="flower-stage" id="flower-stage" aria-hidden="true">
+    <div class="flower-perspective">
+      <svg class="flower-svg" id="flower-svg" viewBox="-200 -200 400 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- Grain d'encre : turbulence légère déplaçant les contours -->
+          <filter id="ink-grain" x="-30%" y="-30%" width="160%" height="160%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.012 0.018" numOctaves="2" seed="7" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="6" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+
+          <!-- Lavis : dégradé vermillon délavé vers le papier -->
+          <radialGradient id="lavis-petale" cx="50%" cy="78%" r="72%">
+            <stop offset="0%" stop-color="#f2dcd4" />
+            <stop offset="42%" stop-color="#e7b3a6" />
+            <stop offset="78%" stop-color="#cf6b56" />
+            <stop offset="100%" stop-color="#b3122b" />
+          </radialGradient>
+
+          <!-- Halo d'encre derrière la fleur -->
+          <radialGradient id="halo-encre" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="rgba(192,57,43,0.22)" />
+            <stop offset="55%" stop-color="rgba(192,57,43,0.07)" />
+            <stop offset="100%" stop-color="rgba(192,57,43,0)" />
+          </radialGradient>
+
+          <!-- Forme d'un pétale de cerisier avec l'encoche caractéristique au sommet.
+               Le pivot d'ouverture est à la base (y = 0). -->
+          <g id="petale-forme">
+            <path class="petale-remplissage"
+              d="M 0 0
+                 C -34 16 -42 78 -28 120
+                 C -22 138 -12 150 -3 138
+                 C -1 134 1 134 3 138
+                 C 12 150 22 138 28 120
+                 C 42 78 34 16 0 0 Z" />
+            <path class="petale-contour"
+              d="M 0 0
+                 C -34 16 -42 78 -28 120
+                 C -22 138 -12 150 -3 138
+                 C -1 134 1 134 3 138
+                 C 12 150 22 138 28 120
+                 C 42 78 34 16 0 0 Z" />
+            <!-- Nervures à l'encre -->
+            <path class="petale-nervure" d="M 0 8 C -2 50 -2 95 -3 128" />
+            <path class="petale-nervure petale-nervure--fine" d="M 0 28 C -10 60 -16 92 -20 116" />
+            <path class="petale-nervure petale-nervure--fine" d="M 0 28 C 10 60 16 92 20 116" />
+          </g>
+        </defs>
+
+        <!-- Halo -->
+        <circle class="flower-halo" id="flower-halo" cx="0" cy="0" r="190" fill="url(#halo-encre)" />
+
+        <!-- Les 5 pétales, ajoutés par main.js dans ce groupe.
+             Filtre grain d'encre appliqué à l'ensemble. -->
+        <g id="petals-group" filter="url(#ink-grain)"></g>
+
+        <!-- Pistil et étamines au centre -->
+        <g class="flower-core" id="flower-core" filter="url(#ink-grain)"></g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <header class="nav" id="nav">
+    <a href="#hero" class="nav__brand">
+      <span class="nav__cn">中国</span>
+      <span class="nav__fr">Voyage en Chine</span>
+    </a>
+    <nav class="nav__links">
+      <a href="#arrivee">L'arrivée</a>
+      <a href="#incontournables">Incontournables</a>
+      <a href="#galerie">Galerie</a>
+      <a href="#reserver" class="nav__cta">Réserver</a>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- SECTION 1 — HERO / FLEUR DE CERISIER -->
+    <section class="hero-scroll" id="hero" aria-label="Introduction">
+      <div class="hero-content">
+        <p class="hero__eyebrow">HETECH · Carnet de voyage</p>
+        <h1 class="hero__title">
+          <span class="hero__cn">中国</span>
+          <span class="hero__main">Voyage en Chine</span>
+        </h1>
+        <p class="hero__subtitle">L'épanouissement d'un voyage, de la première fleur à la cité impériale.</p>
+        <div class="scroll-hint" aria-hidden="true">
+          <span>Faites défiler pour voir la fleur éclore</span>
+          <span class="scroll-hint__arrow">↓</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2 — ARRIVÉE À PÉKIN -->
+    <section class="arrivee" id="arrivee" aria-label="Votre arrivée à Pékin">
+      <div class="plane" aria-hidden="true">
+        <svg viewBox="0 0 120 60" width="120" height="60">
+          <path d="M4 34 L92 22 C100 21 112 24 116 30 C112 33 100 35 92 34 L60 33 L44 50 L36 49 L44 32 L20 31 L12 40 L6 39 L10 30 L4 34 Z" fill="currentColor"/>
+        </svg>
+      </div>
+      <div class="container arrivee__inner">
+        <p class="eyebrow">Étape 1 — L'arrivée</p>
+        <h2 class="section-title reveal">Votre voyage en arrivant à Pékin</h2>
+        <p class="lead reveal">
+          Après des heures passées au-dessus des nuages, l'avion amorce sa descente vers la capitale chinoise.
+          Par le hublot, Pékin se dévoile : un océan de toits gris, des avenues immenses et, au loin,
+          la silhouette dorée de la Cité interdite. Bienvenue au cœur de l'Empire du Milieu.
+        </p>
+        <div class="stats reveal">
+          <div class="stat"><span class="stat__num">≈ 10 h</span><span class="stat__label">de vol depuis Paris</span></div>
+          <div class="stat"><span class="stat__num">+6 h</span><span class="stat__label">de décalage horaire</span></div>
+          <div class="stat"><span class="stat__num">21 M</span><span class="stat__label">d'habitants</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3 — LES INCONTOURNABLES -->
+    <section class="incontournables" id="incontournables" aria-label="Les incontournables de Pékin">
+      <div class="container">
+        <p class="eyebrow">Étape 2 — La découverte</p>
+        <h2 class="section-title reveal">Les incontournables de Pékin</h2>
+        <p class="lead lead--center reveal">Six lieux où se lit toute l'âme de la capitale, du faste impérial aux ruelles séculaires.</p>
+
+        <div class="cards">
+          <article class="card reveal">
+            <div class="card__media"><img src="assets/photos/forbidden-city.jpg" alt="La Cité interdite à Pékin" loading="lazy" /></div>
+            <h3>La Cité interdite</h3>
+            <p>Cinq siècles d'histoire impériale, près de mille pièces et des toits d'or à perte de vue.</p>
+          </article>
+          <article class="card reveal">
+            <div class="card__media"><img src="assets/photos/great-wall.jpg" alt="La Grande Muraille de Chine, près de Pékin" loading="lazy" /></div>
+            <h3>La Grande Muraille</h3>
+            <p>À une heure de Pékin, le serpent de pierre ondule sur les crêtes, jusqu'à l'horizon.</p>
+          </article>
+          <article class="card reveal">
+            <div class="card__media"><img src="assets/photos/tiananmen.jpg" alt="La place Tian'anmen à Pékin" loading="lazy" /></div>
+            <h3>La place Tian'anmen</h3>
+            <p>L'une des plus vastes places du monde, cœur battant et symbole de la nation.</p>
+          </article>
+          <article class="card reveal">
+            <div class="card__media"><img src="assets/photos/temple-of-heaven.jpg" alt="Le temple du Ciel à Pékin" loading="lazy" /></div>
+            <h3>Le temple du Ciel</h3>
+            <p>Un chef-d'œuvre d'harmonie où les empereurs priaient pour de belles récoltes.</p>
+          </article>
+          <article class="card reveal">
+            <div class="card__media"><img src="assets/photos/hutong.jpg" alt="Une ruelle traditionnelle (hutong) de Pékin" loading="lazy" /></div>
+            <h3>Les hutongs</h3>
+            <p>Ruelles séculaires et cours carrées : le Pékin authentique, à découvrir à vélo.</p>
+          </article>
+          <article class="card reveal">
+            <div class="card__media"><img src="assets/photos/summer-palace.jpg" alt="Le Palais d'été et son lac, à Pékin" loading="lazy" /></div>
+            <h3>Le Palais d'été</h3>
+            <p>Jardins impériaux, lac de Kunming et galeries peintes : l'art de vivre à la cour.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4 — GALERIE -->
+    <section class="galerie" id="galerie" aria-label="Galerie">
+      <div class="container">
+        <p class="eyebrow">En images</p>
+        <h2 class="section-title reveal">Un avant-goût du voyage</h2>
+      </div>
+      <div class="gallery-grid">
+        <div class="gallery-item gallery-item--tall reveal"><img src="assets/photos/gallery-1.jpg" alt="Détail des toits de la Cité interdite" loading="lazy" /></div>
+        <div class="gallery-item reveal"><img src="assets/photos/gallery-2.jpg" alt="Lanternes rouges chinoises" loading="lazy" /></div>
+        <div class="gallery-item reveal"><img src="assets/photos/gallery-3.jpg" alt="Le lac Houhai et la tour du Tambour, à Pékin" loading="lazy" /></div>
+        <div class="gallery-item gallery-item--wide reveal"><img src="assets/photos/gallery-4.jpg" alt="Panorama de la Grande Muraille" loading="lazy" /></div>
+        <div class="gallery-item reveal"><img src="assets/photos/gallery-5.jpg" alt="La ligne d'horizon de Pékin" loading="lazy" /></div>
+      </div>
+    </section>
+
+    <!-- SECTION 5 — APPEL À L'ACTION -->
+    <section class="cta" id="reserver" aria-label="Réserver votre voyage">
+      <div class="container cta__inner reveal">
+        <h2 class="cta__title">Prêt à faire éclore votre voyage ?</h2>
+        <p class="cta__text">Composons ensemble votre séjour sur mesure à Pékin et au-delà.</p>
+        <div class="cta__actions">
+          <a href="#" class="btn btn--primary">Réserver mon séjour</a>
+          <a href="#" class="btn btn--ghost">Demander le programme</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="container footer__inner">
+        <p class="footer__brand">中国 · Voyage en Chine</p>
+        <p class="footer__note">Carnet de voyage fictif — démonstration de portfolio réalisée par <strong>HETECH</strong>, création de sites vitrines, Cholet (49).</p>
+        <p class="footer__legal">© <span id="year"></span> HETECH — Variante 2 / SVG + CSS. Tous droits réservés.</p>
+      </div>
+    </footer>
+
+  </main>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

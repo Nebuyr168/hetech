@@ -1,0 +1,365 @@
+/* =========================================================
+   Voyage en Chine — Variante 2 : SVG + CSS 3D / Encre & Sumi-e
+   ========================================================= */
+
+:root {
+  --encre:        #1a1a1a;
+  --encre-doux:   #2b2b2b;
+  --encre-gris:   #54504a;
+  --gris-clair:   #8a847a;
+  --papier:       #f4f1ea;
+  --papier-fonce: #efe9dd;
+  --papier-ombre: #e6dfd0;
+  --vermillon:    #c0392b;
+  --cinabre:      #b3122b;
+  --or:           #b08d4f;
+
+  --font-titre: "Cormorant Garamond", Georgia, serif;
+  --font-corps: "Manrope", system-ui, sans-serif;
+  --font-cn:    "Ma Shan Zheng", "Cormorant Garamond", serif;
+
+  --max: 1180px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-corps);
+  color: var(--encre);
+  background: var(--papier);
+  font-weight: 300;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* --- Texture papier de riz fixée en fond --- */
+.paper-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(1100px 680px at 50% -8%, #fbf9f4 0%, var(--papier) 42%, var(--papier-fonce) 78%, var(--papier-ombre) 100%);
+}
+/* Grain de papier subtil (encre déposée sur fibres) */
+.paper-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(26,26,26,0.5) 0.5px, transparent 1px),
+    radial-gradient(circle at 70% 60%, rgba(26,26,26,0.4) 0.5px, transparent 1px),
+    radial-gradient(circle at 45% 85%, rgba(26,26,26,0.4) 0.5px, transparent 1px);
+  background-size: 7px 7px, 11px 11px, 9px 9px;
+}
+
+/* =========================================================
+   Scène de la fleur (SVG fixé en plein écran)
+   ========================================================= */
+.flower-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  will-change: opacity;
+}
+/* Conteneur en perspective : c'est lui qui donne la profondeur 3D. */
+.flower-perspective {
+  perspective: 900px;
+  perspective-origin: 50% 50%;
+  width: min(74vmin, 620px);
+  height: min(74vmin, 620px);
+  transform: translateZ(0);
+}
+.flower-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+}
+
+/* --- Apparence à l'encre des pétales --- */
+.petale-remplissage {
+  fill: url(#lavis-petale);
+  opacity: 0.82;
+}
+.petale-contour {
+  fill: none;
+  stroke: var(--encre);
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.92;
+}
+.petale-nervure {
+  fill: none;
+  stroke: var(--encre-doux);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  opacity: 0.5;
+}
+.petale-nervure--fine { stroke-width: 1.1; opacity: 0.34; }
+
+/* Chaque pétale tourne autour de sa base : pivot 3D bas-centre. */
+.petale {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* --- Cœur (pistil + étamines) --- */
+.etamine-filament { stroke: var(--or); stroke-width: 2.2; stroke-linecap: round; fill: none; opacity: 0.85; }
+.etamine-anthere  { fill: var(--or); opacity: 0.9; }
+.pistil           { fill: var(--cinabre); opacity: 0.9; }
+.flower-core { will-change: opacity, transform; }
+
+main { position: relative; z-index: 2; }
+
+.container { width: min(var(--max), 90vw); margin-inline: auto; }
+
+/* =========================================================
+   Navigation
+   ========================================================= */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem clamp(1.2rem, 4vw, 3rem);
+  transition: background .4s var(--ease), backdrop-filter .4s var(--ease), box-shadow .4s var(--ease);
+}
+.nav.is-scrolled {
+  background: rgba(244, 241, 234, 0.82);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 rgba(26, 26, 26, 0.12);
+}
+.nav__brand { display: flex; align-items: baseline; gap: .6rem; text-decoration: none; color: var(--encre); }
+.nav__cn { font-family: var(--font-cn); font-size: 1.5rem; color: var(--cinabre); line-height: 1; }
+.nav__fr { font-family: var(--font-titre); font-size: 1.25rem; letter-spacing: .02em; }
+.nav__links { display: flex; align-items: center; gap: clamp(1rem, 2.5vw, 2.2rem); }
+.nav__links a { text-decoration: none; color: var(--encre-gris); font-size: .92rem; letter-spacing: .04em; transition: color .3s; }
+.nav__links a:hover { color: var(--cinabre); }
+.nav__cta {
+  border: 1px solid var(--vermillon);
+  padding: .5rem 1.2rem;
+  border-radius: 999px;
+  color: var(--cinabre) !important;
+}
+.nav__cta:hover { background: var(--vermillon); color: var(--papier) !important; }
+
+/* =========================================================
+   Section 1 — Hero / fleur
+   ========================================================= */
+.hero-scroll { height: 280vh; position: relative; z-index: 2; }
+
+.hero-content {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 1.5rem;
+  gap: 1.1rem;
+  will-change: opacity, transform;
+}
+.hero__eyebrow {
+  text-transform: uppercase;
+  letter-spacing: .42em;
+  font-size: .72rem;
+  color: var(--cinabre);
+  font-weight: 500;
+}
+.hero__title { display: flex; flex-direction: column; align-items: center; gap: .1rem; }
+.hero__cn { font-family: var(--font-cn); font-size: clamp(2.6rem, 7vw, 4.4rem); color: var(--cinabre); line-height: 1; opacity: .92; }
+.hero__main {
+  font-family: var(--font-titre);
+  font-weight: 500;
+  font-size: clamp(2.8rem, 9vw, 6rem);
+  line-height: 1;
+  letter-spacing: .01em;
+  color: var(--encre);
+}
+.hero__subtitle {
+  font-family: var(--font-titre);
+  font-style: italic;
+  font-size: clamp(1.1rem, 2.4vw, 1.5rem);
+  color: var(--encre-gris);
+  max-width: 34ch;
+}
+.scroll-hint {
+  margin-top: 1.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .4rem;
+  font-size: .78rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--encre-gris);
+}
+.scroll-hint__arrow { font-size: 1.2rem; animation: bob 1.8s var(--ease) infinite; }
+@keyframes bob { 0%,100% { transform: translateY(0); opacity: .6; } 50% { transform: translateY(8px); opacity: 1; } }
+
+/* =========================================================
+   Sections de contenu
+   ========================================================= */
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: .3em;
+  font-size: .74rem;
+  font-weight: 600;
+  color: var(--cinabre);
+  margin-bottom: .8rem;
+}
+.section-title {
+  font-family: var(--font-titre);
+  font-weight: 500;
+  font-size: clamp(2.1rem, 5vw, 3.6rem);
+  line-height: 1.1;
+  letter-spacing: .01em;
+  margin-bottom: 1.2rem;
+}
+.lead { font-size: clamp(1.02rem, 1.8vw, 1.22rem); color: var(--encre-gris); max-width: 60ch; }
+.lead--center { margin-inline: auto; text-align: center; }
+
+/* --- Section 2 : arrivée --- */
+.arrivee {
+  position: relative;
+  background: linear-gradient(180deg, rgba(244,241,234,0) 0%, var(--papier) 16%, var(--papier-fonce) 100%);
+  padding: clamp(6rem, 14vh, 11rem) 0 clamp(5rem, 12vh, 9rem);
+  overflow: hidden;
+  box-shadow: 0 -30px 60px rgba(26, 26, 26, 0.06);
+}
+.arrivee__inner { text-align: center; }
+.plane { position: absolute; top: 12%; left: -140px; color: var(--encre-doux); opacity: .8; will-change: transform; }
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(1.5rem, 6vw, 4.5rem);
+  margin-top: 2.8rem;
+}
+.stat { display: flex; flex-direction: column; gap: .2rem; }
+.stat__num { font-family: var(--font-titre); font-size: clamp(1.8rem, 4vw, 2.8rem); color: var(--cinabre); }
+.stat__label { font-size: .82rem; letter-spacing: .06em; text-transform: uppercase; color: var(--encre-gris); }
+
+/* --- Section 3 : incontournables --- */
+.incontournables { background: var(--papier-fonce); padding: clamp(5rem, 11vh, 8rem) 0; text-align: center; }
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.6rem;
+  margin-top: 3rem;
+  text-align: left;
+}
+.card {
+  background: var(--papier);
+  border: 1px solid rgba(26, 26, 26, 0.12);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: transform .5s var(--ease), box-shadow .5s var(--ease);
+}
+.card:hover { transform: translateY(-8px); box-shadow: 0 24px 50px rgba(26, 26, 26, 0.16); }
+.card__media {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: linear-gradient(135deg, var(--papier-ombre), #ddd4c2 60%, #cfc6b2);
+  overflow: hidden;
+}
+.card__media img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(0.12) contrast(1.03); transition: transform .6s var(--ease), filter .6s var(--ease); }
+.card:hover .card__media img { transform: scale(1.06); filter: grayscale(0) contrast(1.06); }
+.card h3 { font-family: var(--font-titre); font-weight: 600; font-size: 1.5rem; margin: 1.1rem 1.3rem .4rem; }
+.card p { margin: 0 1.3rem 1.4rem; color: var(--encre-gris); font-size: .98rem; }
+
+/* --- Section 4 : galerie --- */
+.galerie { background: linear-gradient(180deg, var(--papier-fonce), var(--papier)); padding: clamp(5rem, 11vh, 8rem) 0; text-align: center; }
+.gallery-grid {
+  width: min(var(--max), 92vw);
+  margin: 3rem auto 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 200px;
+  gap: 1rem;
+}
+.gallery-item {
+  position: relative;
+  border-radius: 4px;
+  background: linear-gradient(135deg, var(--papier-ombre), #d2c9b6);
+  overflow: hidden;
+}
+.gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(0.12) contrast(1.03); transition: transform .6s var(--ease), filter .6s var(--ease); }
+.gallery-item:hover img { transform: scale(1.05); filter: grayscale(0) contrast(1.06); }
+.gallery-item--tall { grid-row: span 2; }
+.gallery-item--wide { grid-column: span 2; }
+
+/* --- Section 5 : CTA --- */
+.cta {
+  background: linear-gradient(135deg, var(--encre) 0%, var(--encre-doux) 58%, #3a3631 100%);
+  color: var(--papier);
+  text-align: center;
+  padding: clamp(5rem, 13vh, 9rem) 0;
+}
+.cta__title { font-family: var(--font-titre); font-weight: 500; font-size: clamp(2.2rem, 5vw, 3.6rem); }
+.cta__text { color: rgba(244, 241, 234, .82); margin: 1rem auto 2.2rem; max-width: 46ch; }
+.cta__actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.btn {
+  display: inline-block;
+  padding: .9rem 2rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: .95rem;
+  letter-spacing: .04em;
+  transition: transform .3s var(--ease), box-shadow .3s var(--ease), background .3s;
+}
+.btn--primary { background: var(--vermillon); color: #fff; box-shadow: 0 12px 30px rgba(192, 57, 43, .35); }
+.btn--primary:hover { transform: translateY(-3px); box-shadow: 0 18px 40px rgba(192, 57, 43, .45); }
+.btn--ghost { border: 1px solid rgba(244, 241, 234, .55); color: var(--papier); }
+.btn--ghost:hover { background: rgba(244, 241, 234, .12); }
+
+/* --- Footer --- */
+.footer { background: var(--encre); color: var(--papier-fonce); padding: 3.5rem 0; text-align: center; }
+.footer__brand { font-family: var(--font-cn); font-size: 1.6rem; color: var(--vermillon); margin-bottom: .8rem; }
+.footer__note { max-width: 52ch; margin: 0 auto .8rem; color: #c8c2b6; font-size: .92rem; }
+.footer__legal { font-size: .8rem; color: #908a7e; }
+
+/* =========================================================
+   Animations d'apparition (GSAP gère, fallback ci-dessous)
+   ========================================================= */
+.reveal { opacity: 0; transform: translateY(34px); }
+.reveal.is-in { opacity: 1; transform: none; }
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+@media (max-width: 760px) {
+  .nav__links a:not(.nav__cta) { display: none; }
+  .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+  .gallery-item--wide { grid-column: span 2; }
+  .hero-scroll { height: 240vh; }
+  .flower-perspective { width: min(86vmin, 460px); height: min(86vmin, 460px); }
+}
+
+/* =========================================================
+   Accessibilité — mouvement réduit
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .scroll-hint__arrow { animation: none; }
+  .reveal { opacity: 1; transform: none; }
+}
