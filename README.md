@@ -1,6 +1,6 @@
 # HETECH — Portfolio
 
-Site vitrine / portfolio de **HETECH** — création de sites vitrines modernes.
+Portfolio de **HETECH** — création de sites web modernes.
 
 - **Studio :** HETECH, Entrepreneur Individuel — Cholet (49)
 - **Contact :** hetechcholet@gmail.com · 06 99 44 36 39
